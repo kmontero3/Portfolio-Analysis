@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}Portfolio Overview - Portfolio Analysis{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Portfolio Overview</h2>
+    <p class="subtitle">Real-time portfolio data from your Schwab account</p>
+</div>
+
+<!-- Summary Cards -->
+<div class="summary-cards">
+    <div class="card">
+        <div class="card-header">
+            <h3>Total Value</h3>
+            <span class="icon">💰</span>
+        </div>
+        <div class="card-body">
+            <p class="value" id="totalValue">$0.00</p>
+            <p class="change positive" id="totalChange">+$0.00 (0.00%)</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3>Total Positions</h3>
+            <span class="icon">📈</span>
+        </div>
+        <div class="card-body">
+            <p class="value" id="totalPositions">0</p>
+            <p class="subtitle">Across <span id="accountCount">0</span> account(s)</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3>Cash Balance</h3>
+            <span class="icon">💵</span>
+        </div>
+        <div class="card-body">
+            <p class="value" id="cashBalance">$0.00</p>
+            <p class="subtitle">Available for trading</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3>Total Return</h3>
+            <span class="icon">📊</span>
+        </div>
+        <div class="card-body">
+            <p class="value" id="totalReturn">$0.00</p>
+            <p class="change positive" id="totalReturnPct">0.00%</p>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Section -->
+<div class="charts-section">
+    <div class="chart-container">
+        <div class="card">
+            <div class="card-header">
+                <h3>Asset Allocation</h3>
+                <button onclick="refreshData()" class="btn btn-secondary btn-sm">Refresh</button>
+            </div>
+            <div class="card-body">
+                <canvas id="assetAllocationChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <div class="card">
+            <div class="card-header">
+                <h3>Top Holdings</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="topHoldingsChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Holdings Table -->
+<div class="holdings-section">
+    <div class="card">
+        <div class="card-header">
+            <h3>Portfolio Holdings</h3>
+            <div class="table-controls">
+                <input type="text" id="searchInput" placeholder="Search positions..." class="form-input">
+                <select id="sortSelect" class="form-select">
+                    <option value="value">Sort by Value</option>
+                    <option value="symbol">Sort by Symbol</option>
+                    <option value="return">Sort by Return</option>
+                </select>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="holdings-table" id="holdingsTable">
+                    <thead>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Description</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Market Value</th>
+                            <th>Cost Basis</th>
+                            <th>Gain/Loss</th>
+                            <th>Return %</th>
+                        </tr>
+                    </thead>
+                    <tbody id="holdingsTableBody">
+                        <tr>
+                            <td colspan="8" class="loading-cell">
+                                <div class="spinner"></div>
+                                <p>Loading portfolio data...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Risk Summary -->
+<div class="risk-summary">
+    <div class="card">
+        <div class="card-header">
+            <h3>Risk Analysis</h3>
+            <a href="#" class="btn btn-secondary btn-sm">View Detailed Analysis</a>
+        </div>
+        <div class="card-body">
+            <div class="risk-metrics">
+                <div class="metric">
+                    <label>Diversification Score</label>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="diversificationProgress" style="width: 0%"></div>
+                    </div>
+                    <span id="diversificationScore">0/100</span>
+                </div>
+                <div class="metric">
+                    <label>Concentration Risk</label>
+                    <span class="badge" id="concentrationBadge">-</span>
+                </div>
+                <div class="metric">
+                    <label>Largest Position</label>
+                    <span id="largestPosition">0%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="spinner-large"></div>
+    <p>Loading portfolio data...</p>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('ui.static', filename='js/charts/overview.js') }}"></script>
+<script>
+    // Initialize the overview page
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeOverview();
+    });
+</script>
+{% endblock %}

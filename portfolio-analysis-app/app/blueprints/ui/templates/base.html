@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Portfolio Analysis{% endblock %}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('ui.static', filename='favicon.ico') }}">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('ui.static', filename='css/style.css') }}">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation Header -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-brand">
+                <h1>📊 Portfolio Analysis</h1>
+            </div>
+            <div class="navbar-menu">
+                <a href="{{ url_for('ui.overview') }}" class="nav-link {% if request.endpoint == 'ui.overview' %}active{% endif %}">
+                    Overview
+                </a>
+                <a href="#" class="nav-link">
+                    Risk Analysis
+                </a>
+                <a href="#" class="nav-link">
+                    Performance
+                </a>
+                <div class="auth-status" id="authStatus">
+                    <span class="status-indicator" id="statusIndicator">●</span>
+                    <span id="statusText">Checking...</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Portfolio Analysis. Data provided by Schwab Developer API.</p>
+            <p class="footer-links">
+                <a href="https://developer.schwab.com/" target="_blank">Schwab API</a> |
+                <a href="https://github.com" target="_blank">GitHub</a> |
+                <a href="#" onclick="showAuthModal()">Authenticate</a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Authentication Modal -->
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAuthModal()">&times;</span>
+            <h2>Schwab API Authentication</h2>
+            <p>To access your portfolio data, you need to authenticate with Schwab.</p>
+            <div id="authModalContent">
+                <button onclick="startAuth()" class="btn btn-primary">Authorize with Schwab</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core JavaScript -->
+    <script src="{{ url_for('ui.static', filename='js/app.js') }}"></script>
+    <script src="{{ url_for('ui.static', filename='js/api.js') }}"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
