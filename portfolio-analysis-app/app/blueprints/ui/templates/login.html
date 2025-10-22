@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Portfolio Analysis{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-body text-center p-5">
+                    <h1 class="mb-4">Welcome to Portfolio Analysis</h1>
+                    <p class="text-muted mb-4">Connect your Schwab account to view and analyze your portfolio</p>
+                    
+                    <div id="loginStatus" class="alert alert-info" style="display: none;">
+                        <i class="fas fa-spinner fa-spin"></i> Connecting to Schwab...
+                    </div>
+                    
+                    <button id="loginBtn" class="btn btn-primary btn-lg px-5">
+                        <i class="fas fa-sign-in-alt"></i> Connect to Schwab
+                    </button>
+                    
+                    <div class="mt-4">
+                        <small class="text-muted">
+                            <i class="fas fa-lock"></i> Your credentials are secure and never stored on our servers
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-4 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">How it works</h5>
+                    <ol class="small text-muted mb-0">
+                        <li>Click "Connect to Schwab" to start the secure OAuth process</li>
+                        <li>Log in to your Schwab account in the popup window</li>
+                        <li>Authorize this application to access your portfolio data</li>
+                        <li>You'll be redirected back to view your portfolio</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('loginBtn').addEventListener('click', async function() {
+    const btn = this;
+    const status = document.getElementById('loginStatus');
+    
+    // Disable button and show loading
+    btn.disabled = true;
+    status.style.display = 'block';
+    status.className = 'alert alert-info';
+    status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Getting authorization URL...';
+    
+    try {
+        // Get the Schwab authorization URL from our API
+        const response = await fetch('/api/auth/url');
+        const data = await response.json();
+        
+        if (data.success && data.data.authorization_url) {
+            status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Redirecting to Schwab...';
+            
+            // Redirect to Schwab authorization page
+            // After user authorizes, Schwab will redirect to /callback
+            // which will handle the token exchange and redirect to /overview
+            setTimeout(() => {
+                window.location.href = data.data.authorization_url;
+            }, 500);
+        } else {
+            throw new Error(data.message || 'Failed to get authorization URL');
+        }
+    } catch (error) {
+        status.className = 'alert alert-danger';
+        status.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error: ' + error.message;
+        btn.disabled = false;
+    }
+});
+
+// Check if already authenticated
+window.addEventListener('DOMContentLoaded', async function() {
+    try {
+        const response = await fetch('/api/auth/status');
+        const data = await response.json();
+        
+        if (data.success && data.data.authenticated && data.data.token_valid) {
+            // Already authenticated, redirect to overview
+            window.location.href = '/overview';
+        }
+    } catch (error) {
+        // Not authenticated, stay on login page
+        console.log('Not authenticated yet');
+    }
+});
+</script>
+{% endblock %}
